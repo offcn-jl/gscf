@@ -10,8 +10,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/offcn-jl/chaos-go-scf"           // 框架主题
-	"github.com/offcn-jl/chaos-go-scf/fake-http" // 假 http 包, 移除了 http 包中使用不到的功能
+	"github.com/offcn-jl/chaos-go-scf"           // 框架主体
+	"github.com/offcn-jl/chaos-go-scf/fake-http" // 假 http 包, fork http 包后移除了大量使用不到的功能
 )
 
 func main() {
