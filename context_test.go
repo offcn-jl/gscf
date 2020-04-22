@@ -10,9 +10,11 @@ package chaos
 
 import (
 	"context"
+	"errors"
 	"github.com/offcn-jl/chaos-go-scf/fake-http"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 var _ context.Context = &Context{}
@@ -25,18 +27,18 @@ func TestContextReset(t *testing.T) { // fixme 实现功能后完善测试
 	c.index = 2
 	//c.Writer = &responseWriter{ResponseWriter: httptest.NewRecorder()}
 	//c.Params = Params{Param{}}
-	//c.Error(errors.New("test")) // nolint: errcheck
-	//c.Set("foo", "bar")
+	c.Error(errors.New("test")) // nolint: errcheck
+	c.Set("foo", "bar")
 	c.reset()
 
 	//assert.False(t, c.IsAborted())
-	//assert.Nil(t, c.Keys)
+	assert.Nil(t, c.Keys)
 	//assert.Nil(t, c.Accepted)
-	//assert.Len(t, c.Errors, 0)
-	//assert.Empty(t, c.Errors.Errors())
-	//assert.Empty(t, c.Errors.ByType(ErrorTypeAny))
+	assert.Len(t, c.Errors, 0)
+	assert.Empty(t, c.Errors.Errors())
+	assert.Empty(t, c.Errors.ByType(ErrorTypeAny))
 	//assert.Len(t, c.Params, 0)
-	//assert.EqualValues(t, c.index, -1)
+	assert.EqualValues(t, c.index, -1)
 	//assert.Equal(t, c.Writer.(*responseWriter), &c.writermem)
 }
 
@@ -115,4 +117,20 @@ func TestContextHeaders(t *testing.T) {
 	assert.Equal(t, "text/html", c.Response.Headers["Content-Type"])
 	_, exist := c.Response.Headers["X-Custom"]
 	assert.False(t, exist)
+}
+
+func TestContextGolangContext(t *testing.T) {
+	c, _ := CreateTestContext()
+
+	assert.NoError(t, c.Err())
+	assert.Nil(t, c.Done())
+	ti, ok := c.Deadline()
+	assert.Equal(t, ti, time.Time{})
+	assert.False(t, ok)
+	assert.Equal(t, c.Value(0), c.Request)
+	assert.Nil(t, c.Value("foo"))
+
+	c.Set("foo", "bar")
+	assert.Equal(t, "bar", c.Value("foo"))
+	assert.Nil(t, c.Value(1))
 }
