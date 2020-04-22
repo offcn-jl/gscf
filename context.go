@@ -162,6 +162,18 @@ func (c *Context) Get(key string) (value interface{}, exists bool) {
 /************ INPUT DATA ************/
 /************************************/
 
+// Param 可以返回 URL param 的值
+// 与 gin 不同, 在本框架中, 它是 c.Request.PathParameters[key] 的语法糖
+// Param returns the value of the URL param.
+// It is a shortcut for c.Params.ByName(key)
+//     router.GET("/user/:id", func(c *gin.Context) {
+//         // a GET request to /user/john
+//         id := c.Param("id") // id == "john"
+//     })
+func (c *Context) Param(key string) string {
+	return c.Request.PathParameters[key]
+}
+
 // ClientIP 在修改后直接返回 SCF Api 网关触发器时间中的 RequestContext.SourceIP
 func (c *Context) ClientIP() string {
 	return c.Request.RequestContext.SourceIP
