@@ -9,7 +9,9 @@
 package chaos
 
 import (
+	"github.com/offcn-jl/chaos-go-scf/fake-http"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
+	"strings"
 )
 
 // CreateTestContext returns a fresh engine and context for testing purposes
@@ -26,13 +28,27 @@ type header struct {
 }
 
 // 从 router_test 中迁移至此, 并进行修改
-func performRequest(r *Engine, headers ...header) scf.APIGatewayProxyResponse {
+func performRequest(r *Engine, method, path string, headers ...header) scf.APIGatewayProxyResponse {
 	c := new(Context)
 	c.engine = r
 
-	if c.Request.Headers == nil {
-		c.Request.Headers = make(map[string]string) // 空 map 需要初始化后才可以使用 : 排除报错 panic: assignment to entry in nil map [recovered]
+	c.Request.HTTPMethod = method
+	c.Request.Path = path
+	if len(strings.Split(path, "?")) > 1 { // 将 path 拆分为 SCF API 网关 Event 的数据结构
+		c.Request.Path = strings.Split(path, "?")[0]
+		if c.Request.QueryString == nil {
+			c.Request.QueryString = make(map[string]string)
+		}
+		for _, value := range strings.Split(strings.Split(path, "?")[1], "&") {
+			if len(strings.Split(value, "=")) > 1 {
+				c.Request.QueryString[strings.Split(value, "=")[0]] = strings.Split(value, "=")[1]
+			} else {
+				c.Request.QueryString[strings.Split(value, "=")[0]] = ""
+			}
+		}
 	}
+	c.Status(http.StatusOK)
+
 	for _, h := range headers {
 		c.Request.Headers[h.Key] = h.Value
 	}
