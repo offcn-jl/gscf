@@ -37,7 +37,16 @@ func (r JSON) WriteContentType(w *scf.APIGatewayProxyResponse) {
 // WriteJSON marshals the given interface object and writes it with custom ContentType.
 func WriteJSON(w *scf.APIGatewayProxyResponse, obj interface{}) error {
 	writeContentType(w, jsonContentType)
+
+	//encoder := json.NewEncoder(w)  // gin 框架原来的生成 json 方式
+	//err := encoder.Encode(&obj)  // gin 框架原来的生成 json 方式
+
+	//buffer := new(bytes.Buffer) // 模拟 gin 框架 json 生成方式
+	//encoder := json.NewEncoder(buffer)  // 模拟 gin 框架 json 生成方式
+	//err := encoder.Encode(&obj) // 模拟 gin 框架 json 生成方式
+	//w.Body = buffer.String() // 模拟 gin 框架 json 生成方式, 这样生成出来的 json 会带有一个 \n
+
 	jsonBytes, err := json.Marshal(obj)
-	w.Body = string(jsonBytes)
+	w.Body = string(jsonBytes) // 这样生成的 json 会比 gin 框架少一个 \n , 本质原因是少了 json.encoder 添加的 \n
 	return err
 }
