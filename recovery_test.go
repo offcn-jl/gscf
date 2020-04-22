@@ -30,7 +30,7 @@ func TestPanicClean(t *testing.T) {
 	})
 
 	// RUN
-	w := performRequest(router,
+	w := performRequest(router, "GET", "/",
 		header{
 			Key:   "Host",
 			Value: "www.google.com",
@@ -60,7 +60,7 @@ func TestPanicInHandler(t *testing.T) {
 		panic("Oupps, Houston, we have a problem")
 	})
 	// RUN
-	w := performRequest(router)
+	w := performRequest(router, "GET", "/")
 	// TEST
 	assert.Equal(t, http.StatusInternalServerError, w.StatusCode)
 	assert.Contains(t, buffer.String(), "panic recovered")
@@ -70,7 +70,7 @@ func TestPanicInHandler(t *testing.T) {
 	// Debug mode prints the request
 	SetMode(DebugMode)
 	// RUN
-	w = performRequest(router)
+	w = performRequest(router, "GET", "/")
 	// TEST
 	assert.Equal(t, http.StatusInternalServerError, w.StatusCode)
 
@@ -85,7 +85,7 @@ func TestPanicWithAbort(t *testing.T) {
 		panic("Oupps, Houston, we have a problem")
 	})
 	// RUN
-	w := performRequest(router)
+	w := performRequest(router, "GET", "/")
 	// TEST
 	assert.Equal(t, http.StatusBadRequest, w.StatusCode)
 }
@@ -136,7 +136,7 @@ func TestPanicWithBrokenPipe(t *testing.T) {
 				panic(e)
 			})
 			// RUN
-			w := performRequest(router)
+			w := performRequest(router, "GET", "/")
 			// TEST
 			assert.Equal(t, expectCode, w.StatusCode)
 			assert.Contains(t, strings.ToLower(buf.String()), expectMsg)
