@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-// todo 完善 logger 包及其单元测试
-
 // 因为云函数环境不支持显示颜色，所以移除了日志颜色相关的处理逻辑
 
 // LoggerConfig 定义日志中间件的配置
@@ -47,22 +45,31 @@ type LogFormatter func(params LogFormatterParams) string
 type LogFormatterParams struct {
 	// 由于移除了 http 包及其相关的 Request 逻辑, 所以此处移除了 Request 结构
 
+	// TimeStamp 标记服务器返回响应后经过的时间
 	// TimeStamp shows the time after the server returns a response.
 	TimeStamp time.Time
+	// StatusCode 是返回的 HTTP 状态码
 	// StatusCode is HTTP response code.
 	StatusCode int
+	// Latency 是服务器处理某个请求所花费的时间
 	// Latency is how much time the server cost to process a certain request.
 	Latency time.Duration
+	// ClientIP 等于上下文的 ClientIP
 	// ClientIP equals Context's ClientIP method.
 	ClientIP string
+	// Method 是请求的 HTTP 方法
 	// Method is the HTTP method given to the request.
 	Method string
+	// Path 是请求的 Path
 	// Path is a path the client requests.
 	Path string
+	// ErrorMessage 会在处理请求发生错误时被设置
 	// ErrorMessage is set if error has occurred in processing the request.
 	ErrorMessage string
+	// BodySize 是响应体的大小
 	// BodySize is the size of the Response Body
 	BodySize int
+	// Keys 是请在请求上下文中设置的键值对
 	// Keys are the keys set on the request's context.
 	Keys map[string]interface{}
 }
@@ -74,7 +81,7 @@ var defaultLogFormatter = func(param LogFormatterParams) string {
 		// Truncate in a golang < 1.8 safe way
 		param.Latency = param.Latency - param.Latency%time.Second
 	}
-	return fmt.Sprintf("[GIN] %v | %3d | %13v | %15s | %-7s %s\n%s",
+	return fmt.Sprintf("[CHOAS] %v | %3d | %13v | %15s | %-7s %s\n%s",
 		param.TimeStamp.Format("2006/01/02 - 15:04:05"),
 		param.StatusCode,
 		param.Latency,
@@ -85,12 +92,50 @@ var defaultLogFormatter = func(param LogFormatterParams) string {
 	)
 }
 
+// ErrorLogger 返回任何错误类型的 handlerfunc
+// ErrorLogger returns a handlerfunc for any error type.
+func ErrorLogger() HandlerFunc {
+	return ErrorLoggerT(ErrorTypeAny)
+}
+
+// ErrorLoggerT 返回给定错误类型的 handlerfunc
+// ErrorLoggerT returns a handlerfunc for a given error type.
+func ErrorLoggerT(typ ErrorType) HandlerFunc {
+	return func(c *Context) {
+		c.Next()
+		errors := c.Errors.ByType(typ)
+		fmt.Println(errors)
+		if len(errors) > 0 {
+			c.JSON(-1, errors)
+		}
+	}
+}
+
 // Logger 初始化一个写入日志到 chaos.DefaultWriter 的日志中间件
 // 默认情况下，chaos.DefaultWriter=os.Stdout
 // Logger instances a Logger middleware that will write the logs to gin.DefaultWriter.
 // By default gin.DefaultWriter = os.Stdout.
 func Logger() HandlerFunc {
 	return LoggerWithConfig(LoggerConfig{})
+}
+
+// LoggerWithFormatter 使用指定的日志格式函数实例一个日志中间件
+// LoggerWithFormatter instance a Logger middleware with the specified log format function.
+func LoggerWithFormatter(f LogFormatter) HandlerFunc {
+	return LoggerWithConfig(LoggerConfig{
+		Formatter: f,
+	})
+}
+
+// LoggerWithWriter 使用给定的 writer buffer 实例一个日志中间件, 并且可以通过 notlogged 跳过不需要记录的内容、
+// 例如: os.Stdout, 一个使用 write mode 打开的文件, 一个 socket 链接...
+// LoggerWithWriter instance a Logger middleware with the specified writer buffer.
+// Example: os.Stdout, a file opened in write mode, a socket...
+func LoggerWithWriter(out io.Writer, notlogged ...string) HandlerFunc {
+	return LoggerWithConfig(LoggerConfig{
+		Output:    out,
+		SkipPaths: notlogged,
+	})
 }
 
 // LoggerWithConfig 使用配置初始化一个日志中间件
@@ -119,10 +164,16 @@ func LoggerWithConfig(conf LoggerConfig) HandlerFunc {
 	}
 
 	return func(c *Context) {
-		/*// Start timer fixme
+		// Start timer
 		start := time.Now()
-		//path := c.Request.URL.Path
-		//raw := c.Request.URL.RawQuery
+		path := c.Request.Path
+		raw := ""
+		for key, value := range c.Request.QueryString {
+			raw += raw + key + "=" + value + "&"
+		}
+		if len(c.Request.QueryString) > 0 { // 拼接后的 queryString 会多在结尾出一个 & , 进行删除
+			raw = raw[0 : len(raw)-1]
+		}
 
 		// Process request
 		c.Next()
@@ -130,8 +181,8 @@ func LoggerWithConfig(conf LoggerConfig) HandlerFunc {
 		// Log only when path is not being skipped
 		if _, ok := skip[path]; !ok {
 			param := LogFormatterParams{
-				Request: c.Request,
-				Keys:    c.Keys,
+				//Request: c.Request,
+				Keys: c.Keys,
 			}
 
 			// Stop timer
@@ -139,11 +190,11 @@ func LoggerWithConfig(conf LoggerConfig) HandlerFunc {
 			param.Latency = param.TimeStamp.Sub(start)
 
 			param.ClientIP = c.ClientIP()
-			param.Method = c.Request.Method
-			param.StatusCode = c.Writer.Status()
+			param.Method = c.Request.HTTPMethod      // c.Request.Method
+			param.StatusCode = c.Response.StatusCode // c.Writer.Status()
 			param.ErrorMessage = c.Errors.ByType(ErrorTypePrivate).String()
 
-			param.BodySize = c.Writer.Size()
+			param.BodySize = len(c.Request.Body) // c.Writer.Size()
 
 			if raw != "" {
 				path = path + "?" + raw
@@ -152,6 +203,6 @@ func LoggerWithConfig(conf LoggerConfig) HandlerFunc {
 			param.Path = path
 
 			fmt.Fprint(out, formatter(param))
-		}*/
+		}
 	}
 }
