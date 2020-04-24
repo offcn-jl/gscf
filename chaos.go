@@ -10,6 +10,7 @@ package chaos
 
 import (
 	"context"
+	"github.com/offcn-jl/chaos-go-scf/fake-http"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"github.com/tencentyun/scf-go-lib/cloudfunction"
 )
@@ -100,6 +101,9 @@ func (engine *Engine) start(ctx context.Context, event scf.APIGatewayProxyReques
 
 	// 执行调用链
 	c.Next()
+
+	// 如果未设置响应头, 则添加默认响应头 StatusOK
+	c.Response.StatusCode = http.StatusOK
 
 	// 返回响应体给 SCF fixme 此处应该可以直接返回 c.Response
 	return scf.APIGatewayProxyResponse{
