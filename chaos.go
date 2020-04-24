@@ -77,12 +77,11 @@ func (engine *Engine) Use(middleware ...HandlerFunc) *Engine {
 
 // Run attaches the router to a http.Server and starts listening and serving HTTP requests.
 // It is a shortcut for http.ListenAndServe(addr, router)
-// Note: this method will block the calling goroutine indefinitely unless an error happens.
-func (engine *Engine) Run() (err error) {
-	defer func() { debugPrintError(err) }()
+// Note: this method will block the calling goroutine indefinitely unless an error happens. // fixme 翻译
+// 此函数与 Gin 不同, 没有会返回 err 的步骤, 所以去掉了返回值中的 err, 以及用于 handle err 的 defer
+func (engine *Engine) Run() {
 	debugPrint("Start Running.")
 	cloudfunction.Start(engine.start)
-	return
 }
 
 // 基于 scf 实现 handleHTTPRequest 的逻辑
