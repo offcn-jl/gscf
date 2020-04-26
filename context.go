@@ -13,6 +13,7 @@ import (
 	"github.com/offcn-jl/chaos-go-scf/render"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"math"
+	"strings"
 	"time"
 )
 
@@ -221,6 +222,16 @@ func (c *Context) Header(key, value string) {
 		return
 	}
 	c.Response.Headers[key] = value
+}
+
+// GetHeader 从 c.Response.Headers 中取出值后返回
+// GetHeader returns value from request headers.
+func (c *Context) GetHeader(key string) string {
+	// 参照 net/textproto/header 实现
+	if len(c.Request.Headers[strings.ToLower(key)]) == 0 {
+		return ""
+	}
+	return c.Request.Headers[strings.ToLower(key)]
 }
 
 // Render 写入响应头并调用 render.Render 来呈现数据
