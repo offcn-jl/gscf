@@ -102,14 +102,11 @@ func (engine *Engine) start(ctx context.Context, event scf.APIGatewayProxyReques
 	// 执行调用链
 	c.Next()
 
-	// 如果未设置响应头, 则添加默认响应头 StatusOK
-	c.Response.StatusCode = http.StatusOK
+	// 如果未设置响应状态码, 则添加默认响应状态码 StatusOK
+	if c.Response.StatusCode == 0 {
+		c.Response.StatusCode = http.StatusOK
+	}
 
-	// 返回响应体给 SCF fixme 此处应该可以直接返回 c.Response
-	return scf.APIGatewayProxyResponse{
-		StatusCode:      c.Response.StatusCode,
-		Headers:         c.Response.Headers,
-		Body:            c.Response.Body,
-		IsBase64Encoded: false,
-	}, nil
+	// 返回响应体给 SCF
+	return c.Response, nil
 }
