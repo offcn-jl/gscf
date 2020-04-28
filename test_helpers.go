@@ -49,6 +49,9 @@ func performRequest(r *Engine, method, path string, headers ...header) scf.APIGa
 	}
 	c.Status(http.StatusOK)
 
+	if c.Request.Headers == nil {
+		c.Request.Headers = make(map[string]string)
+	}
 	for _, h := range headers {
 		c.Request.Headers[h.Key] = h.Value
 	}

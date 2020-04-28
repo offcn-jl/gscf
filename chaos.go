@@ -10,6 +10,7 @@ package chaos
 
 import (
 	"context"
+	"github.com/offcn-jl/chaos-go-scf/fake-http"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"github.com/tencentyun/scf-go-lib/cloudfunction"
 )
@@ -77,12 +78,11 @@ func (engine *Engine) Use(middleware ...HandlerFunc) *Engine {
 
 // Run attaches the router to a http.Server and starts listening and serving HTTP requests.
 // It is a shortcut for http.ListenAndServe(addr, router)
-// Note: this method will block the calling goroutine indefinitely unless an error happens.
-func (engine *Engine) Run() (err error) {
-	defer func() { debugPrintError(err) }()
+// Note: this method will block the calling goroutine indefinitely unless an error happens. // fixme 翻译
+// 此函数与 Gin 不同, 没有会返回 err 的步骤, 所以去掉了返回值中的 err, 以及用于 handle err 的 defer
+func (engine *Engine) Run() {
 	debugPrint("Start Running.")
 	cloudfunction.Start(engine.start)
-	return
 }
 
 // 基于 scf 实现 handleHTTPRequest 的逻辑
@@ -102,11 +102,11 @@ func (engine *Engine) start(ctx context.Context, event scf.APIGatewayProxyReques
 	// 执行调用链
 	c.Next()
 
-	// 返回响应体给 SCF fixme 此处应该可以直接返回 c.Response
-	return scf.APIGatewayProxyResponse{
-		StatusCode:      c.Response.StatusCode,
-		Headers:         c.Response.Headers,
-		Body:            c.Response.Body,
-		IsBase64Encoded: false,
-	}, nil
+	// 如果未设置响应状态码, 则添加默认响应状态码 StatusOK
+	if c.Response.StatusCode == 0 {
+		c.Response.StatusCode = http.StatusOK
+	}
+
+	// 返回响应体给 SCF
+	return c.Response, nil
 }

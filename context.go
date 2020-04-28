@@ -13,6 +13,7 @@ import (
 	"github.com/offcn-jl/chaos-go-scf/render"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"math"
+	"strings"
 	"time"
 )
 
@@ -162,6 +163,18 @@ func (c *Context) Get(key string) (value interface{}, exists bool) {
 /************ INPUT DATA ************/
 /************************************/
 
+// Param 可以返回 URL param 的值
+// 与 gin 不同, 在本框架中, 它是 c.Request.PathParameters[key] 的语法糖
+// Param returns the value of the URL param.
+// It is a shortcut for c.Params.ByName(key)
+//     router.GET("/user/:id", func(c *gin.Context) {
+//         // a GET request to /user/john
+//         id := c.Param("id") // id == "john"
+//     })
+func (c *Context) Param(key string) string {
+	return c.Request.PathParameters[key]
+}
+
 // ClientIP 在修改后直接返回 SCF Api 网关触发器时间中的 RequestContext.SourceIP
 func (c *Context) ClientIP() string {
 	return c.Request.RequestContext.SourceIP
@@ -209,6 +222,16 @@ func (c *Context) Header(key, value string) {
 		return
 	}
 	c.Response.Headers[key] = value
+}
+
+// GetHeader 从 c.Response.Headers 中取出值后返回
+// GetHeader returns value from request headers.
+func (c *Context) GetHeader(key string) string {
+	// 参照 net/textproto/header 实现
+	if len(c.Request.Headers[strings.ToLower(key)]) == 0 {
+		return ""
+	}
+	return c.Request.Headers[strings.ToLower(key)]
 }
 
 // Render 写入响应头并调用 render.Render 来呈现数据
