@@ -1,8 +1,8 @@
-name: Build
+name: Master Build
 
 on:
-  push:
-    branches: [ new-feature ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
 
