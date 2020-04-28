@@ -1,4 +1,4 @@
-name: Bilid
+name: Build
 
 on:
   push:
