@@ -10,14 +10,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/offcn-jl/chaos-go-scf"           // 框架主体
-	"github.com/offcn-jl/chaos-go-scf/fake-http" // 假 http 包, fork http 包后移除了大量使用不到的功能
+	"github.com/offcn-jl/cscf"           // 框架主体
+	"github.com/offcn-jl/cscf/fake-http" // 假 http 包, fork http 包后移除了大量使用不到的功能
 )
 
 func main() {
 	r := chaos.Default() // 将 gin 中初始化 engine 的 gin.Default() 修改为 chaos.Default() 即可
 	r.Use(basicHandler)  // 由于移除了 router 逻辑，所以直接将 handler 作为 engine.Use 的最后一个参数传给 engine 即可
-	_ = r.Run()
+	r.Run()
 }
 
 func basicHandler(c *chaos.Context) {

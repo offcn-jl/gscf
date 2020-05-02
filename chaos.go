@@ -10,7 +10,7 @@ package chaos
 
 import (
 	"context"
-	"github.com/offcn-jl/chaos-go-scf/fake-http"
+	"github.com/offcn-jl/cscf/fake-http"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"github.com/tencentyun/scf-go-lib/cloudfunction"
 )

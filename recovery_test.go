@@ -11,7 +11,7 @@ package chaos
 import (
 	"bytes"
 	"fmt"
-	"github.com/offcn-jl/chaos-go-scf/fake-http"
+	"github.com/offcn-jl/cscf/fake-http"
 	"github.com/stretchr/testify/assert"
 	"net"
 	"os"

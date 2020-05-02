@@ -9,8 +9,8 @@
 package chaos
 
 import (
-	"github.com/offcn-jl/chaos-go-scf/fake-http"
-	"github.com/offcn-jl/chaos-go-scf/render"
+	"github.com/offcn-jl/cscf/fake-http"
+	"github.com/offcn-jl/cscf/render"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"math"
 	"strings"
