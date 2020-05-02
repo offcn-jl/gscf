@@ -1,4 +1,4 @@
-module github.com/offcn-jl/chaos-go-scf
+module github.com/offcn-jl/cscf
 
 go 1.12
 

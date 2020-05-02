@@ -10,7 +10,7 @@ package chaos
 
 import (
 	"fmt"
-	"github.com/offcn-jl/chaos-go-scf/fake-http"
+	"github.com/offcn-jl/cscf/fake-http"
 	"reflect"
 	"testing"
 )
