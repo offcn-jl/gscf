@@ -6,11 +6,11 @@
    @Software: GoLand
 */
 
-package chaos
+package gin
 
 import (
 	"context"
-	"github.com/offcn-jl/cscf/fake-http"
+	"github.com/offcn-jl/gscf/fake-http"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
 	"github.com/tencentyun/scf-go-lib/cloudfunction"
 )

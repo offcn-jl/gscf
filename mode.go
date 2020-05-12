@@ -6,7 +6,7 @@
    @Software: GoLand
 */
 
-package chaos
+package gin
 
 import (
 	"io"

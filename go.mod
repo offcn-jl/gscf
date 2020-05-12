@@ -1,4 +1,4 @@
-module github.com/offcn-jl/cscf
+module github.com/offcn-jl/gscf
 
 go 1.12
 

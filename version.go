@@ -6,6 +6,7 @@
    @Software: GoLand
 */
 
-package chaos
+package gin
 
-const Version = "0.1.0"
+// Version 代表框架的版本
+const Version = "0.2.0"
