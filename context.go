@@ -9,6 +9,7 @@
 package gin
 
 import (
+	"github.com/offcn-jl/gscf/binding"
 	"github.com/offcn-jl/gscf/fake-http"
 	"github.com/offcn-jl/gscf/render"
 	"github.com/tencentyun/scf-go-lib/cloudevents/scf"
@@ -182,6 +183,19 @@ func (c *Context) Get(key string) (value interface{}, exists bool) {
 //     })
 func (c *Context) Param(key string) string {
 	return c.Request.PathParameters[key]
+}
+
+// ShouldBindJSON 是 c.ShouldBindWith(obj, binding.JSON) 的快捷方式
+// ShouldBindJSON is a shortcut for c.ShouldBindWith(obj, binding.JSON).
+func (c *Context) ShouldBindJSON(obj interface{}) error {
+	return c.ShouldBindWith(obj, binding.JSON)
+}
+
+// ShouldBindWith 使用指定的绑定引擎绑定数据到传递到结构体指针
+// ShouldBindWith binds the passed struct pointer using the specified binding engine.
+// See the binding package.
+func (c *Context) ShouldBindWith(obj interface{}, b binding.Binding) error {
+	return b.Bind(c.Request, obj)
 }
 
 // ClientIP 在修改后直接返回 SCF Api 网关触发器时间中的 RequestContext.SourceIP
