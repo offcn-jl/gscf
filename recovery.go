@@ -6,12 +6,12 @@
    @Software: GoLand
 */
 
-package chaos
+package gin
 
 import (
 	"bytes"
 	"fmt"
-	"github.com/offcn-jl/cscf/fake-http"
+	"github.com/offcn-jl/gscf/fake-http"
 	"io"
 	"io/ioutil"
 	"log"
